@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Foto-Assistent</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0D0D0D">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Foto-Assistent">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#0D0D0D; --surface:#1A1A1A; --surface2:#242222; --line:#2E2B2B;
+  --text:#F5F2F0; --muted:#A89F9B; --rose:#C6998B; --rose-dark:#B08275; --mauve:#4A3540;
+  --ok:#8FB59A; --warn:#E0B07A;
+  --safe-t:env(safe-area-inset-top,0px); --safe-b:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,sans-serif;font-size:17px;line-height:1.45}
+body{min-height:100dvh;display:flex;flex-direction:column}
+h1,h2{font-family:"Playfair Display",Georgia,serif;font-weight:500;margin:0;letter-spacing:.2px}
+h1{font-size:26px} h2{font-size:23px}
+button{font:inherit;color:inherit}
+header.bar{position:sticky;top:0;z-index:5;background:rgba(13,13,13,.92);backdrop-filter:blur(8px);
+  padding:calc(var(--safe-t) + 10px) 16px 10px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line)}
+.bar .back{width:40px;height:40px;border-radius:20px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;font-size:20px;cursor:pointer}
+.bar .back[hidden]{display:none}
+.bar .title{flex:1;min-width:0}
+.bar .brand{font-family:"Playfair Display",Georgia,serif;letter-spacing:3px;font-size:13px;color:var(--rose)}
+.bar .sub{font-size:14px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+main{flex:1;width:100%;max-width:560px;margin:0 auto;padding:18px 16px calc(var(--safe-b) + 24px)}
+.lead{color:var(--muted);margin:6px 0 18px}
+.grid{display:grid;gap:12px}
+.tile{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;cursor:pointer}
+.tile:active{border-color:var(--rose)}
+.tile .ico{flex:none;width:64px;height:64px;border-radius:12px;background:var(--surface2);display:grid;place-items:center;overflow:hidden}
+.tile .ico svg{width:60px;height:60px}
+.tile b{display:block;font-weight:600;font-size:18px}
+.tile span{color:var(--muted);font-size:14px}
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:58px;border-radius:16px;border:0;font-weight:600;font-size:18px;cursor:pointer;padding:0 18px}
+.btn.primary{background:var(--rose);color:#1F1E1E}
+.btn.primary:active{background:var(--rose-dark)}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--text)}
+.btn.small{min-height:46px;font-size:16px;font-weight:500}
+.row{display:flex;gap:10px}
+.row>*{flex:1}
+.stack{display:grid;gap:10px;margin-top:18px}
+.checklist{list-style:none;padding:0;margin:0;display:grid;gap:10px}
+.checklist label{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;cursor:pointer}
+.checklist input{appearance:none;flex:none;width:26px;height:26px;border-radius:8px;border:2px solid var(--muted);margin:0;display:grid;place-items:center}
+.checklist input:checked{background:var(--rose);border-color:var(--rose)}
+.checklist input:checked::after{content:"✓";color:#1F1E1E;font-weight:700;font-size:16px}
+.progress{display:flex;gap:5px;margin:0 0 14px}
+.progress i{flex:1;height:5px;border-radius:3px;background:var(--line)}
+.progress i.done{background:var(--ok)} .progress i.now{background:var(--rose)}
+.stepno{color:var(--rose);font-size:14px;font-weight:600;letter-spacing:.5px;text-transform:uppercase}
+.figure{position:relative;margin:12px 0 14px;background:radial-gradient(120% 90% at 50% 30%,#2a2526,#161414);border:1px solid var(--line);border-radius:20px;aspect-ratio:4/5;display:grid;place-items:center;overflow:hidden}
+.figure svg{width:86%;height:auto}
+.figure .tag{position:absolute;left:12px;top:12px;background:rgba(13,13,13,.75);border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:13px;color:var(--muted)}
+.figure img{width:100%;height:100%;object-fit:cover}
+.instr{font-size:20px;font-weight:500;margin:4px 0 8px}
+.tips{margin:0;padding-left:20px;color:var(--muted);font-size:15px}
+.tips li{margin:3px 0}
+.thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.thumb{position:relative;aspect-ratio:4/5;border-radius:12px;overflow:hidden;background:var(--surface);border:1px solid var(--line);cursor:pointer;padding:0}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb .lbl{position:absolute;left:0;right:0;bottom:0;padding:16px 6px 5px;font-size:11px;background:linear-gradient(transparent,rgba(0,0,0,.85));text-align:left}
+.thumb.missing{display:grid;place-items:center;color:var(--warn);font-size:12px;text-align:center;padding:6px}
+.note{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--rose);border-radius:12px;padding:12px 14px;font-size:15px;color:var(--muted);margin-top:16px}
+.note b{color:var(--text)}
+.hidden{display:none!important}
+.toast{position:fixed;left:16px;right:16px;bottom:calc(var(--safe-b) + 16px);background:var(--surface2);border:1px solid var(--rose);border-radius:14px;padding:14px;text-align:center;z-index:20}
+.modal{position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.7);display:grid;place-items:end center;padding:16px 16px calc(var(--safe-b) + 16px)}
+.modal .box{width:100%;max-width:520px;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:18px;display:grid;gap:10px}
+.modal p{margin:0 0 6px;font-size:18px}
+.foot{color:#6f6764;font-size:12px;text-align:center;margin-top:26px}
+</style>
+</head>
+<body>
+<header class="bar">
+  <button class="back" id="back" hidden aria-label="Zurück">‹</button>
+  <div class="title">
+    <div class="brand">DERMA LUMA</div>
+    <div class="sub" id="sub">Foto-Assistent</div>
+  </div>
+</header>
+<main id="app"></main>
+<input type="file" id="cam" accept="image/*" capture="environment" class="hidden">
+
+<script>
+"use strict";
+/* ============================================================
+   Foto-Assistent Derma Luma
+   Datenschutz: Diese Seite speichert nichts und lädt nichts hoch.
+   Fotos liegen nur im Arbeitsspeicher dieses Browser-Tabs, bis sie
+   über „Teilen“ in der Fotos-App gesichert werden.
+   ============================================================ */
+
+/* ---------- Illustrationen (Beispielbilder, keine echten Personen) ---------- */
+const C = { skin:"#E9D3C7", skinS:"#D9BBAB", line:"#5B4048", hair:"#3A2A30", rose:"#C6998B", shirt:"#4A3540" };
+
+function hl(z){ // Markierung der Zielzone
+  if(!z) return "";
+  return `<ellipse cx="${z[0]}" cy="${z[1]}" rx="${z[2]}" ry="${z[3]}" fill="rgba(198,153,139,.18)" stroke="${C.rose}" stroke-width="2.5" stroke-dasharray="6 5"/>`;
+}
+
+function frontal(o={}){
+  const brows = {
+    neutral:`<path d="M64 93 Q78 87 91 92"/><path d="M109 92 Q122 87 136 93"/>`,
+    up:`<path d="M64 84 Q78 74 91 81"/><path d="M109 81 Q122 74 136 84"/>`,
+    frown:`<path d="M64 89 Q79 88 93 97"/><path d="M107 97 Q121 88 136 89"/><path d="M96 92 L97 102" stroke-width="1.6"/><path d="M104 92 L103 102" stroke-width="1.6"/>`
+  }[o.brows||"neutral"];
+  const forehead = o.brows==="up" ? `<g stroke-width="1.5" opacity=".8"><path d="M70 62 Q100 56 130 62"/><path d="M68 69 Q100 63 132 69"/><path d="M72 76 Q100 71 128 76"/></g>` : "";
+  const eyes = o.squint
+    ? `<path d="M70 107 Q80 101 90 107"/><path d="M110 107 Q120 101 130 107"/>
+       <g stroke-width="1.5"><path d="M62 101 L56 98"/><path d="M62 106 L55 106"/><path d="M62 111 L56 114"/><path d="M138 101 L144 98"/><path d="M138 106 L145 106"/><path d="M138 111 L144 114"/></g>`
+    : `<path d="M69 107 Q80 99 91 107 Q80 112 69 107Z" fill="#fff"/><circle cx="80" cy="106.5" r="3.6" fill="${C.line}" stroke="none"/>
+       <path d="M109 107 Q120 99 131 107 Q120 112 109 107Z" fill="#fff"/><circle cx="120" cy="106.5" r="3.6" fill="${C.line}" stroke="none"/>`;
+  const nose = o.below
+    ? `<path d="M90 130 Q100 124 110 130"/><ellipse cx="94" cy="131" rx="3.4" ry="2.2" fill="${C.line}" stroke="none"/><ellipse cx="106" cy="131" rx="3.4" ry="2.2" fill="${C.line}" stroke="none"/>`
+    : `<path d="M99 110 Q96 124 92 131 Q100 137 108 131"/>`;
+  const mouth = {
+    neutral:`<path d="M86 151 Q100 155 114 151"/>`,
+    smile:`<path d="M80 146 Q100 167 120 146 Q100 152 80 146Z" fill="#fff"/><path d="M84 149 Q100 154 116 149" stroke-width="1"/>
+           <path d="M76 132 Q72 142 78 150" stroke-width="1.5"/><path d="M124 132 Q128 142 122 150" stroke-width="1.5"/>`,
+    platysma:`<path d="M82 156 Q100 146 118 156 Q100 160 82 156Z" fill="#fff"/><path d="M85 156 Q100 151 115 156" stroke-width="1"/>`
+  }[o.mouth||"neutral"];
+  const neckCords = o.mouth==="platysma" ? `<g stroke-width="1.8"><path d="M87 170 L76 214"/><path d="M93 174 L88 214"/><path d="M113 170 L124 214"/><path d="M107 174 L112 214"/></g>` : "";
+  const below = o.below ? `<path d="M64 158 Q100 196 136 158" stroke-width="1.5" opacity=".7"/>` : "";
+  return `<svg viewBox="0 0 200 250" fill="none" stroke="${C.line}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+    <path d="M26 250 Q34 210 80 204 L120 204 Q166 210 174 250Z" fill="${C.shirt}" stroke="none"/>
+    <path d="M82 160 L82 208 Q100 216 118 208 L118 160Z" fill="${C.skinS}"/>
+    ${neckCords}
+    <path d="M44 112 Q38 42 100 36 Q162 42 156 112 Q160 70 140 56 Q100 30 60 56 Q40 70 44 112Z" fill="${C.hair}" stroke="none"/>
+    <ellipse cx="48" cy="114" rx="7" ry="13" fill="${C.skin}"/><ellipse cx="152" cy="114" rx="7" ry="13" fill="${C.skin}"/>
+    <ellipse cx="100" cy="110" rx="52" ry="${o.below?62:66}" fill="${C.skin}"/>
+    <path d="M52 92 Q56 52 100 48 Q144 52 148 92 Q140 62 100 58 Q60 62 52 92Z" fill="${C.hair}" stroke="none"/>
+    ${forehead}${brows}${eyes}${nose}${mouth}${below}
+    ${hl(o.zone)}
+  </svg>`;
+}
+
+function threeQuarter(o={}){ // Nase zeigt im Bild nach rechts = rechte Gesichtshälfte zur Kamera
+  const eyes = o.squint
+    ? `<path d="M80 107 Q90 101 100 107"/><path d="M122 107 Q129 102 136 107"/><g stroke-width="1.5"><path d="M72 101 L65 98"/><path d="M72 106 L64 106"/><path d="M72 111 L65 114"/></g>`
+    : `<path d="M79 107 Q90 99 101 107 Q90 112 79 107Z" fill="#fff"/><circle cx="92" cy="106.5" r="3.5" fill="${C.line}" stroke="none"/>
+       <path d="M122 107 Q129 101 137 107 Q129 111 122 107Z" fill="#fff"/><circle cx="131" cy="106.5" r="3" fill="${C.line}" stroke="none"/>`;
+  const mouth = {
+    neutral:`<path d="M100 152 Q113 155 126 151"/>`,
+    smile:`<path d="M94 146 Q114 165 132 145 Q114 151 94 146Z" fill="#fff"/><path d="M88 132 Q84 142 90 150" stroke-width="1.5"/>`,
+    platysma:`<path d="M96 156 Q114 147 130 155 Q114 159 96 156Z" fill="#fff"/>`
+  }[o.mouth||"neutral"];
+  const cords = o.mouth==="platysma" ? `<g stroke-width="1.8"><path d="M96 172 L86 214"/><path d="M104 176 L100 214"/><path d="M116 174 L122 212"/></g>` : "";
+  return `<svg viewBox="0 0 200 250" fill="none" stroke="${C.line}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+    <path d="M26 250 Q36 210 84 204 L124 204 Q168 212 176 250Z" fill="${C.shirt}" stroke="none"/>
+    <path d="M88 160 L86 208 Q104 216 124 208 L120 160Z" fill="${C.skinS}"/>
+    ${cords}
+    <path d="M42 116 Q34 44 98 36 Q160 40 154 106 Q150 66 128 54 Q90 34 58 58 Q42 74 42 116Z" fill="${C.hair}" stroke="none"/>
+    <path d="M52 110 Q50 46 104 44 Q152 48 150 104 Q152 150 132 170 Q114 182 96 178 Q62 168 54 140Z" fill="${C.skin}"/>
+    <ellipse cx="62" cy="116" rx="8" ry="14" fill="${C.skin}"/>
+    <path d="M58 92 Q62 54 104 52 Q142 56 148 90 Q136 64 104 62 Q72 64 58 92Z" fill="${C.hair}" stroke="none"/>
+    <path d="M78 93 Q90 87 102 92"/><path d="M121 92 Q130 88 138 92"/>
+    <path d="M114 110 Q120 124 128 132 Q122 138 114 134"/>
+    ${eyes}${mouth}${hl(o.zone)}
+  </svg>`;
+}
+
+function profile(o={}){ // Profil, Blick nach rechts
+  const mouth = o.mouth==="smile" ? `<path d="M134 150 Q128 154 124 150" stroke-width="1.8"/>` : `<path d="M140 150 L132 150" stroke-width="1.6"/>`;
+  return `<svg viewBox="0 0 200 250" fill="none" stroke="${C.line}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+    <path d="M30 250 Q40 212 76 206 L120 206 Q150 214 160 250Z" fill="${C.shirt}" stroke="none"/>
+    <path d="M72 40 Q130 30 140 82 L142 98 Q137 104 140 110 L156 130 Q151 138 142 138 Q147 145 143 150 Q140 154 145 158 Q139 166 141 172 Q137 183 118 185 L114 206 L74 206 L76 170 Q44 150 46 110 Q48 58 72 40Z" fill="${C.skin}"/>
+    <path d="M70 38 Q120 26 138 70 Q118 56 96 60 Q80 66 78 96 Q72 110 70 130 Q50 140 46 112 Q44 56 70 38Z" fill="${C.hair}" stroke="none"/>
+    <ellipse cx="88" cy="114" rx="8" ry="13" fill="${C.skinS}"/>
+    <path d="M122 100 Q131 96 139 100"/><path d="M126 108 L135 108"/>
+    ${mouth}${hl(o.zone)}
+  </svg>`;
+}
+
+function closeup(o={}){
+  return `<svg viewBox="0 0 200 250" fill="none" stroke="${C.line}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+    <rect x="18" y="26" width="164" height="200" rx="22" fill="${C.skin}" stroke="none"/>
+    <path d="M18 70 Q70 60 120 82" stroke-width="1.6" opacity=".6"/>
+    <path d="M150 40 Q140 110 160 180" stroke-width="1.6" opacity=".6"/>
+    <g fill="${C.skinS}" stroke="none"><circle cx="70" cy="120" r="3"/><circle cx="90" cy="140" r="2.4"/><circle cx="110" cy="118" r="2.8"/><circle cx="84" cy="160" r="2"/><circle cx="120" cy="150" r="2.6"/><circle cx="64" cy="146" r="2.2"/><circle cx="104" cy="170" r="2.4"/></g>
+    <rect x="44" y="88" width="104" height="104" rx="10" stroke="${C.rose}" stroke-width="2.5" stroke-dasharray="7 5"/>
+    <g stroke="${C.rose}" stroke-width="3"><path d="M44 104 V88 H60"/><path d="M132 88 H148 V104"/><path d="M148 176 V192 H132"/><path d="M60 192 H44 V176"/></g>
+  </svg>`;
+}
+
+const VIEW = { frontal, threeQuarter, profile, closeup };
+const mirror = svg => svg.replace('<svg ', '<svg style="transform:scaleX(-1)" ');
+
+/* ---------- Posen ---------- */
+// side: "links" = linke Gesichtshälfte der Person zeigt zur Kamera
+const P = {
+  ruhe:      { title:"Frontal, Gesicht entspannt", say:"Bitte gerade in die Kamera schauen, Gesicht ganz locker lassen.", draw:()=>frontal(),
+               tips:["Kopf gerade, nicht nach oben oder unten kippen","Mund geschlossen, Zähne locker"] },
+  boese:     { title:"Böse schauen", say:"Bitte ganz böse schauen, die Augenbrauen fest zusammenziehen.", draw:()=>frontal({brows:"frown",zone:[100,96,16,12]}),
+               tips:["Zornesfalte zwischen den Augenbrauen muss gut sichtbar sein","Ruhig übertreiben lassen"] },
+  brauenHoch:{ title:"Augenbrauen hochziehen", say:"Bitte die Augenbrauen so weit wie möglich hochziehen, wie überrascht.", draw:()=>frontal({brows:"up",zone:[100,70,40,15]}),
+               tips:["Stirnfalten müssen komplett zu sehen sein","Haare aus der Stirn"] },
+  lachen:    { title:"Breit lachen", say:"Bitte richtig breit lachen, bis sich die Augen zusammenkneifen.", draw:()=>frontal({mouth:"smile",squint:true,zone:[100,106,56,14]}),
+               tips:["Lachfältchen an den Augen müssen sichtbar sein","Beide Augenwinkel im Bild"] },
+  lachenL:   { title:"Lachen, seitlich links", say:"Kopf leicht nach rechts drehen (linke Gesichtshälfte zur Kamera) und breit lachen.", draw:()=>mirror(threeQuarter({mouth:"smile",squint:true,zone:[66,106,14,14]})),
+               tips:["Etwa 45° drehen, nicht ganz ins Profil","Linker Augenwinkel mittig im Bild"] },
+  lachenR:   { title:"Lachen, seitlich rechts", say:"Kopf leicht nach links drehen (rechte Gesichtshälfte zur Kamera) und breit lachen.", draw:()=>threeQuarter({mouth:"smile",squint:true,zone:[66,106,14,14]}),
+               tips:["Etwa 45° drehen, nicht ganz ins Profil","Rechter Augenwinkel mittig im Bild"] },
+  halsAn:    { title:"Hals anspannen", say:"Bitte die Mundwinkel kräftig nach unten ziehen und die unteren Zähne zeigen, so dass sich der Hals anspannt.", draw:()=>frontal({mouth:"platysma",zone:[100,190,34,26]}),
+               tips:["Kinn bis Schlüsselbein muss im Bild sein","Halsstränge (Platysma) gut sichtbar","Schal, Kette, hohen Kragen ablegen"] },
+  seiteLRuhe:{ title:"Seitlich links, entspannt", say:"Kopf leicht nach rechts drehen (linke Gesichtshälfte zur Kamera), Gesicht entspannt.", draw:()=>mirror(threeQuarter({zone:[90,180,34,26]})),
+               tips:["Etwa 45°","Kinn, Kieferlinie und Hals im Bild"] },
+  seiteLAn:  { title:"Seitlich links, Hals angespannt", say:"Gleiche Position, jetzt Mundwinkel nach unten ziehen und Hals anspannen.", draw:()=>mirror(threeQuarter({mouth:"platysma",zone:[100,188,34,24]})),
+               tips:["Gleicher Abstand wie beim Foto davor"] },
+  seiteRRuhe:{ title:"Seitlich rechts, entspannt", say:"Kopf leicht nach links drehen (rechte Gesichtshälfte zur Kamera), Gesicht entspannt.", draw:()=>threeQuarter({zone:[90,180,34,26]}),
+               tips:["Etwa 45°","Kinn, Kieferlinie und Hals im Bild"] },
+  seiteRAn:  { title:"Seitlich rechts, Hals angespannt", say:"Gleiche Position, jetzt Mundwinkel nach unten ziehen und Hals anspannen.", draw:()=>threeQuarter({mouth:"platysma",zone:[100,188,34,24]}),
+               tips:["Gleicher Abstand wie beim Foto davor"] },
+  laecheln:  { title:"Lächeln", say:"Bitte natürlich lächeln.", draw:()=>frontal({mouth:"smile",zone:[100,152,30,16]}),
+               tips:["Lippen mittig und scharf im Bild"] },
+  profilL:   { title:"Profil links", say:"Kopf ganz zur Seite drehen, so dass die linke Gesichtshälfte zur Kamera zeigt.", draw:()=>mirror(profile({zone:[140,140,24,32]})),
+               tips:["Genau 90°, die andere Augenbraue darf nicht zu sehen sein","Kopf gerade, Blick geradeaus"] },
+  profilR:   { title:"Profil rechts", say:"Kopf ganz zur Seite drehen, so dass die rechte Gesichtshälfte zur Kamera zeigt.", draw:()=>profile({zone:[140,140,24,32]}),
+               tips:["Genau 90°, die andere Augenbraue darf nicht zu sehen sein","Kopf gerade, Blick geradeaus"] },
+  vonUnten:  { title:"Schräg von unten", say:"Bitte das Kinn leicht anheben. Du fotografierst etwas von unten.", draw:()=>frontal({below:true,zone:[100,140,30,24]}),
+               tips:["Handy etwa auf Kinnhöhe halten","Nasenlöcher bzw. Lippenkontur sichtbar"] },
+  nase45L:   { title:"45° links", say:"Kopf leicht nach rechts drehen (linke Gesichtshälfte zur Kamera), Gesicht entspannt.", draw:()=>mirror(threeQuarter()),
+               tips:["Etwa 45°","Ganzes Gesicht im Bild"] },
+  nase45R:   { title:"45° rechts", say:"Kopf leicht nach links drehen (rechte Gesichtshälfte zur Kamera), Gesicht entspannt.", draw:()=>threeQuarter(),
+               tips:["Etwa 45°","Ganzes Gesicht im Bild"] },
+  nah:       { title:"Nahaufnahme Problemzone", say:"Handy näher an die behandelte Stelle halten (ca. 30 cm), Stelle mittig.", draw:()=>closeup(),
+               tips:["Nicht zoomen, sondern näher rangehen","Auf die Haut tippen, damit sie scharf wird","Kein Blitz, keine Schatten"] },
+};
+
+const TREAT = [
+  { id:"botulinum", name:"Faltenbehandlung (Botulinum)", hint:"Stirn, Zornesfalte, Krähenfüße", icon:()=>frontal({brows:"frown"}),
+    poses:["ruhe","boese","brauenHoch","lachen","lachenL","lachenR"] },
+  { id:"nefertiti", name:"Nefertiti Lift", hint:"Hals und Kieferlinie", icon:()=>frontal({mouth:"platysma"}),
+    poses:["ruhe","halsAn","seiteLRuhe","seiteLAn","seiteRRuhe","seiteRAn"] },
+  { id:"lippen", name:"Lippen (Hyaluron)", hint:"Lippenvolumen und -kontur", icon:()=>frontal({mouth:"smile"}),
+    poses:["ruhe","laecheln","profilL","profilR","vonUnten"] },
+  { id:"nase", name:"Nase (Hyaluron)", hint:"Nasenprofil", icon:()=>profile(),
+    poses:["ruhe","profilL","profilR","vonUnten"] },
+  { id:"haut", name:"Skinbooster, Peel, Polynukleotide", hint:"Hautbild", icon:()=>closeup(),
+    poses:["ruhe","nase45L","nase45R","nah"] },
+];
+
+const PREP = [
+  "Heller, ruhiger Hintergrund (weiße Wand), Fenster nicht im Rücken",
+  "Gleiches Licht wie immer, kein Blitz",
+  "Haare zurück (Haarband), Stirn und Ohren frei",
+  "Make-up, Brille und Schmuck ab",
+  "Handy im Hochformat, auf Augenhöhe, ca. 1 m Abstand, nicht zoomen",
+];
+
+/* ---------- Zustand (nur im Arbeitsspeicher) ---------- */
+const S = { screen:"home", t:null, i:0, shots:{}, pending:null };
+const app = document.getElementById("app");
+const cam = document.getElementById("cam");
+const back = document.getElementById("back");
+const sub = document.getElementById("sub");
+const treat = () => TREAT.find(t=>t.id===S.t);
+const shotCount = () => Object.keys(S.shots).length;
+
+function go(screen, extra={}){ Object.assign(S,{screen},extra); render(); window.scrollTo(0,0); }
+
+function render(){
+  back.hidden = S.screen==="home";
+  sub.textContent = S.screen==="home" ? "Foto-Assistent" : treat().name;
+  ({home, prep, step, review, summary})[S.screen]();
+}
+
+function home(){
+  app.innerHTML = `
+    <h1>Wofür ist die Person da?</h1>
+    <p class="lead">Behandlung antippen. Danach führt dich die App Foto für Foto durch.</p>
+    <div class="grid">${TREAT.map(t=>`
+      <button class="tile" data-t="${t.id}">
+        <div class="ico">${t.icon()}</div>
+        <div><b>${t.name}</b><span>${t.hint} · ${t.poses.length} Fotos</span></div>
+      </button>`).join("")}
+    </div>
+    <div class="note"><b>Datenschutz:</b> Diese App speichert nichts und lädt nichts hoch. Die Fotos bleiben nur auf diesem Handy, bis du sie am Ende in der Fotos-App sicherst. Keine Namen eingeben.</div>
+    <p class="foot">Beispielbilder sind Illustrationen.</p>`;
+  app.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>go("prep",{t:b.dataset.t,i:0,shots:{}}));
+}
+
+function prep(){
+  app.innerHTML = `
+    <h2>Kurz vorbereiten</h2>
+    <p class="lead">Alles abhaken, dann geht es los.</p>
+    <ul class="checklist">${PREP.map((p,k)=>`<li><label><input type="checkbox" data-k="${k}"><span>${p}</span></label></li>`).join("")}</ul>
+    <div class="note"><b>Einwilligung</b> zur Fotodokumentation muss unterschrieben sein.</div>
+    <div class="stack"><button class="btn primary" id="go" disabled style="opacity:.45">Los geht's</button></div>`;
+  const boxes=[...app.querySelectorAll("input")], goBtn=app.querySelector("#go");
+  boxes.forEach(b=>b.onchange=()=>{const ok=boxes.every(x=>x.checked); goBtn.disabled=!ok; goBtn.style.opacity=ok?1:.45;});
+  goBtn.onclick=()=>go("step",{i:0});
+}
+
+function progressBar(){
+  const t=treat();
+  return `<div class="progress">${t.poses.map((p,k)=>`<i class="${S.shots[k]?"done":k===S.i?"now":""}"></i>`).join("")}</div>`;
+}
+
+function step(){
+  const t=treat(), key=t.poses[S.i], p=P[key];
+  app.innerHTML = `
+    ${progressBar()}
+    <div class="stepno">Foto ${S.i+1} von ${t.poses.length}</div>
+    <h2>${p.title}</h2>
+    <div class="figure"><span class="tag">Beispiel</span>${p.draw()}</div>
+    <p class="instr">„${p.say}“</p>
+    <ul class="tips">${p.tips.map(x=>`<li>${x}</li>`).join("")}</ul>
+    <div class="stack">
+      <button class="btn primary" id="shoot">📷 Foto aufnehmen</button>
+      <div class="row">
+        ${S.i>0?`<button class="btn ghost small" id="prev">Zurück</button>`:""}
+        <button class="btn ghost small" id="skip">Überspringen</button>
+      </div>
+    </div>`;
+  app.querySelector("#shoot").onclick=()=>{cam.value="";cam.click();};
+  app.querySelector("#skip").onclick=next;
+  const pv=app.querySelector("#prev"); if(pv) pv.onclick=()=>go("step",{i:S.i-1});
+}
+
+cam.onchange=()=>{
+  const f=cam.files && cam.files[0]; if(!f) return;
+  S.pending={file:f,url:URL.createObjectURL(f)};
+  go("review");
+};
+
+function review(){
+  const t=treat(), p=P[t.poses[S.i]];
+  app.innerHTML = `
+    ${progressBar()}
+    <div class="stepno">Foto ${S.i+1} von ${t.poses.length}</div>
+    <h2>Passt das Foto?</h2>
+    <div class="row" style="margin-top:12px;gap:8px">
+      <div class="figure" style="margin:0"><span class="tag">Beispiel</span>${p.draw()}</div>
+      <div class="figure" style="margin:0"><span class="tag" style="z-index:1">Dein Foto</span><img src="${S.pending.url}" alt=""></div>
+    </div>
+    <ul class="tips" style="margin-top:12px"><li>Ist die Mimik wie im Beispiel?</li><li>Scharf, gut ausgeleuchtet, alles im Bild?</li></ul>
+    <div class="stack">
+      <button class="btn primary" id="ok">✓ Passt, weiter</button>
+      <button class="btn ghost" id="again">Nochmal aufnehmen</button>
+    </div>`;
+  app.querySelector("#ok").onclick=()=>{
+    const old=S.shots[S.i]; if(old) URL.revokeObjectURL(old.url);
+    S.shots[S.i]={...S.pending,key:t.poses[S.i]}; S.pending=null; next();
+  };
+  app.querySelector("#again").onclick=()=>{URL.revokeObjectURL(S.pending.url);S.pending=null;cam.value="";cam.click();go("step");};
+}
+
+function next(){
+  const t=treat();
+  if(S.i < t.poses.length-1) go("step",{i:S.i+1}); else go("summary");
+}
+
+function stamp(){
+  const d=new Date(),z=n=>String(n).padStart(2,"0");
+  return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}_${z(d.getHours())}${z(d.getMinutes())}`;
+}
+function files(){
+  const t=treat(), st=stamp();
+  return Object.entries(S.shots).sort((a,b)=>a[0]-b[0]).map(([k,s])=>{
+    const ext=(s.file.type.split("/")[1]||"jpg").replace("jpeg","jpg");
+    return new File([s.file],`DL_${t.id}_${+k+1}-${s.key}_${st}.${ext}`,{type:s.file.type||"image/jpeg"});
+  });
+}
+
+function summary(){
+  const t=treat(), n=shotCount();
+  const missing=t.poses.map((k,i)=>S.shots[i]?null:P[k].title).filter(Boolean);
+  app.innerHTML = `
+    <h2>Fertig${n?"":" – noch keine Fotos"}</h2>
+    <p class="lead">${n} von ${t.poses.length} Fotos aufgenommen. Antippen, um ein Foto neu zu machen.</p>
+    <div class="thumbs">${t.poses.map((k,i)=>S.shots[i]
+      ? `<button class="thumb" data-i="${i}"><img src="${S.shots[i].url}" alt=""><span class="lbl">${i+1}. ${P[k].title}</span></button>`
+      : `<button class="thumb missing" data-i="${i}">fehlt:<br>${P[k].title}</button>`).join("")}
+    </div>
+    ${missing.length?`<div class="note"><b>Fehlt noch:</b> ${missing.join(", ")}</div>`:""}
+    <div class="stack">
+      <button class="btn primary" id="share" ${n?"":"disabled style='opacity:.45'"}>In Fotos-App sichern</button>
+      <button class="btn ghost" id="done">Fertig, Fotos aus der App löschen</button>
+    </div>
+    <div class="note">Im Teilen-Menü <b>„${n||"X"} Bilder sichern“</b> wählen. Danach die Fotos wie gewohnt in der Behandlungsakte (Clinicminds) hochladen und vom Handy löschen.</div>`;
+  app.querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>go("step",{i:+b.dataset.i}));
+  app.querySelector("#share").onclick=share;
+  app.querySelector("#done").onclick=()=>{
+    if(S.saved || !shotCount()) return reset();
+    ask("Die Fotos wurden noch nicht gesichert. Wirklich verwerfen?","Ja, verwerfen",reset);
+  };
+}
+
+async function share(){
+  const fs=files();
+  try{
+    if(navigator.canShare && navigator.canShare({files:fs})){
+      await navigator.share({files:fs});
+      S.saved=true; toast("Gesichert? Dann auf „Fertig“ tippen.");
+      return;
+    }
+  }catch(e){ if(e && e.name==="AbortError") return; }
+  // Fallback (z. B. Desktop): einzeln herunterladen
+  fs.forEach(f=>{const a=document.createElement("a");a.href=URL.createObjectURL(f);a.download=f.name;document.body.appendChild(a);a.click();a.remove();});
+  S.saved=true;
+}
+
+function reset(){
+  Object.values(S.shots).forEach(s=>URL.revokeObjectURL(s.url));
+  go("home",{t:null,i:0,shots:{},pending:null,saved:false});
+}
+
+function ask(msg, yesLabel, onYes){
+  const d=document.createElement("div");d.className="modal";
+  d.innerHTML=`<div class="box"><p>${msg}</p><button class="btn primary" data-a="y">${yesLabel}</button><button class="btn ghost" data-a="n">Abbrechen</button></div>`;
+  d.onclick=e=>{const a=e.target.dataset&&e.target.dataset.a; if(a||e.target===d){d.remove(); if(a==="y") onYes();}};
+  document.body.appendChild(d);
+}
+
+function toast(msg){
+  const d=document.createElement("div");d.className="toast";d.textContent=msg;document.body.appendChild(d);
+  setTimeout(()=>d.remove(),3500);
+}
+
+back.onclick=()=>{
+  if(S.screen==="prep") return shotCount() ? ask("Abbrechen? Aufgenommene Fotos gehen verloren.","Ja, abbrechen",reset) : reset();
+  if(S.screen==="step") return S.i>0 ? go("step",{i:S.i-1}) : go("prep");
+  if(S.screen==="review") return go("step");
+  if(S.screen==="summary") return go("step",{i:treat().poses.length-1});
+};
+
+window.addEventListener("beforeunload",e=>{ if(shotCount() && !S.saved){ e.preventDefault(); e.returnValue=""; } });
+
+if("serviceWorker" in navigator && location.protocol==="https:") navigator.serviceWorker.register("sw.js").catch(()=>{});
+
+render();
+</script>
+</body>
+</html>
