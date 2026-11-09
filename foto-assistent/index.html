@@ -67,6 +67,7 @@ main{flex:1;width:100%;max-width:560px;margin:0 auto;padding:18px 16px calc(var(
 .figure svg{width:86%;height:auto}
 .figure .tag{position:absolute;left:12px;top:12px;background:rgba(13,13,13,.75);border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:13px;color:var(--muted)}
 .figure img{width:100%;height:100%;object-fit:cover}
+.figure .tag{z-index:1}
 .instr{font-size:20px;font-weight:500;margin:4px 0 8px}
 .tips{margin:0;padding-left:20px;color:var(--muted);font-size:15px}
 .tips li{margin:3px 0}
@@ -200,6 +201,11 @@ function closeup(o={}){
 const VIEW = { frontal, threeQuarter, profile, closeup };
 const mirror = svg => svg.replace('<svg ', '<svg style="transform:scaleX(-1)" ');
 
+/* Echte Beispielfotos: Datei beispiele/<pose>.jpg. Nur Posen in dieser Liste nutzen ein Foto,
+   alle anderen zeigen weiter die Illustration. Nur Bilder mit Einwilligung bzw. KI-generierte Bilder, nie Patientenfotos. */
+const FOTOS = new Set([]);
+const example = key => FOTOS.has(key) ? `<img src="beispiele/${key}.jpg" alt="Beispiel: ${P[key].title}">` : P[key].draw();
+
 /* ---------- Posen ---------- */
 // side: "links" = linke Gesichtshälfte der Person zeigt zur Kamera
 const P = {
@@ -317,7 +323,7 @@ function step(){
     ${progressBar()}
     <div class="stepno">Foto ${S.i+1} von ${t.poses.length}</div>
     <h2>${p.title}</h2>
-    <div class="figure"><span class="tag">Beispiel</span>${p.draw()}</div>
+    <div class="figure"><span class="tag">Beispiel</span>${example(key)}</div>
     <p class="instr">„${p.say}“</p>
     <ul class="tips">${p.tips.map(x=>`<li>${x}</li>`).join("")}</ul>
     <div class="stack">
@@ -345,7 +351,7 @@ function review(){
     <div class="stepno">Foto ${S.i+1} von ${t.poses.length}</div>
     <h2>Passt das Foto?</h2>
     <div class="row" style="margin-top:12px;gap:8px">
-      <div class="figure" style="margin:0"><span class="tag">Beispiel</span>${p.draw()}</div>
+      <div class="figure" style="margin:0"><span class="tag">Beispiel</span>${example(t.poses[S.i])}</div>
       <div class="figure" style="margin:0"><span class="tag" style="z-index:1">Dein Foto</span><img src="${S.pending.url}" alt=""></div>
     </div>
     <ul class="tips" style="margin-top:12px"><li>Ist die Mimik wie im Beispiel?</li><li>Scharf, gut ausgeleuchtet, alles im Bild?</li></ul>
