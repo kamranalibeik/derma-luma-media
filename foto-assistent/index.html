@@ -203,7 +203,7 @@ const mirror = svg => svg.replace('<svg ', '<svg style="transform:scaleX(-1)" ')
 
 /* Echte Beispielfotos: Datei beispiele/<pose>.jpg. Nur Posen in dieser Liste nutzen ein Foto,
    alle anderen zeigen weiter die Illustration. Nur Bilder mit Einwilligung bzw. KI-generierte Bilder, nie Patientenfotos. */
-const FOTOS = new Set([]);
+const FOTOS = new Set(["ruhe","boese","brauenHoch","lachen","lachenL","lachenR","halsAn","seiteLRuhe","seiteLAn","seiteRRuhe","seiteRAn","laecheln","profilL","profilR","vonUnten","nase45L","nase45R","nah"]);
 const example = key => FOTOS.has(key) ? `<img src="beispiele/${key}.jpg" alt="Beispiel: ${P[key].title}">` : P[key].draw();
 
 /* ---------- Posen ---------- */
@@ -296,7 +296,7 @@ function home(){
       </button>`).join("")}
     </div>
     <div class="note"><b>Datenschutz:</b> Diese App speichert nichts und lädt nichts hoch. Die Fotos bleiben nur auf diesem Handy, bis du sie am Ende in der Fotos-App sicherst. Keine Namen eingeben.</div>
-    <p class="foot">Beispielbilder sind Illustrationen.</p>`;
+    <p class="foot">Beispielbilder sind KI-generiert (keine echte Patientin).</p>`;
   app.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>go("prep",{t:b.dataset.t,i:0,shots:{}}));
 }
 
