@@ -281,7 +281,8 @@ const mirror = svg => svg.replace('<svg ', '<svg style="transform:scaleX(-1)" ')
 
 /* Echte Beispielfotos: Datei beispiele/<pose>.jpg. Nur Posen in dieser Liste nutzen ein Foto,
    alle anderen zeigen weiter die Illustration. Nur Bilder mit Einwilligung bzw. KI-generierte Bilder, nie Patientenfotos. */
-const FOTOS = new Set(["ruhe","boese","brauenHoch","lachen","lachenL","lachenR","halsAn","seiteLRuhe","seiteLAn","seiteRRuhe","seiteRAn","laecheln","profilL","profilR","vonUnten","nase45L","nase45R","nah"]);
+const FOTOS = new Set(["ruhe","boese","brauenHoch","lachen","lachenL","lachenR","halsAn","seiteLRuhe","seiteLAn","seiteRRuhe","seiteRAn","laecheln","profilL","profilR","vonUnten","nase45L","nase45R","nah",
+  "beissen","beissenL","beissenR","unterlid","dekollete","handruecken","achseln","haende","fuesse","koerperVorne","koerperHinten","koerperL","koerperR","armeVorne","armeHinten"]);
 const example = key => FOTOS.has(key) ? `<img src="beispiele/${key}.jpg" alt="Beispiel: ${P[key].title}">` : P[key].draw();
 
 /* ---------- Posen ---------- */
