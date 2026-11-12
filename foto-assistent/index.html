@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Foto-Assistent</title>
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#0D0D0D">
@@ -25,7 +25,7 @@
   --safe-t:env(safe-area-inset-top,0px); --safe-b:env(safe-area-inset-bottom,0px);
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,sans-serif;font-size:17px;line-height:1.45}
+html,body{overscroll-behavior:none;touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-text-size-adjust:100%;margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,sans-serif;font-size:17px;line-height:1.45}
 body{height:100dvh;display:flex;flex-direction:column;overflow:hidden}
 h1,h2{font-family:"Playfair Display",Georgia,serif;font-weight:500;margin:0;letter-spacing:.2px}
 h1{font-size:23px} h2{font-size:21px}
@@ -37,7 +37,7 @@ header.bar{position:sticky;top:0;z-index:5;background:rgba(13,13,13,.92);backdro
 .bar .title{flex:1;min-width:0}
 .bar .brand{font-family:"Playfair Display",Georgia,serif;letter-spacing:3px;font-size:13px;color:var(--rose)}
 .bar .sub{font-size:14px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-main{flex:1;min-height:0;width:100%;max-width:560px;margin:0 auto;padding:12px 16px calc(var(--safe-b) + 12px);display:flex;flex-direction:column;gap:10px;overflow-y:auto}
+main{flex:1;min-height:0;width:100%;max-width:560px;margin:0 auto;padding:12px 16px calc(var(--safe-b) + 12px);display:flex;flex-direction:column;gap:10px;overflow:hidden}
 main>*{flex:none}
 main .grow{flex:1 1 0;min-height:120px}
 .lead{color:var(--muted);margin:0;font-size:15px;line-height:1.35}
@@ -56,6 +56,27 @@ main .grow{flex:1 1 0;min-height:120px}
 .row{display:flex;gap:10px}
 .row>*{flex:1}
 .stack{display:grid;gap:8px}
+.grid.two{grid-template-columns:1fr 1fr}
+.grid.two .tile{gap:10px;padding:8px 10px;min-height:64px}
+.grid.two .tile .ico{width:40px;height:40px}
+.grid.two .tile .ico svg{width:40px;height:40px}
+.grid.two .tile b{font-size:14px}
+.grid.two .tile span{font-size:12px}
+.grid.list{gap:6px}
+.grid.list .tile{padding:9px 14px;min-height:52px}
+.grid.list .tile>div{flex:1}
+.grid.list .tile b{font-size:15px}
+.chev{font-style:normal;color:var(--muted);font-size:22px}
+.tile.main{border-color:var(--rose);background:linear-gradient(135deg,#2a2224,var(--surface));padding:12px}
+.tile.main .ico{width:56px;height:56px}
+.tile.main .ico svg{width:54px;height:54px}
+.tile.main b{font-size:18px}
+.preplist{margin:0;padding:10px 12px 10px 30px;background:var(--surface);border:1px solid var(--line);border-radius:12px;display:grid;gap:4px;font-size:15px;line-height:1.35}
+.checkall{display:flex;gap:12px;align-items:center;background:var(--surface2);border:1px solid var(--rose);border-radius:14px;padding:12px 14px;cursor:pointer;font-size:14px;line-height:1.35;color:var(--muted)}
+.checkall b{color:var(--text);font-size:16px}
+.checkall input{appearance:none;flex:none;width:30px;height:30px;border-radius:9px;border:2px solid var(--rose);margin:0;display:grid;place-items:center}
+.checkall input:checked{background:var(--rose)}
+.checkall input:checked::after{content:"✓";color:#1F1E1E;font-weight:700;font-size:18px}
 .checklist{list-style:none;padding:0;margin:0;display:grid;gap:6px}
 .checklist label{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer;font-size:15px;line-height:1.35;align-items:center}
 .checklist input{appearance:none;flex:none;width:26px;height:26px;border-radius:8px;border:2px solid var(--muted);margin:0;display:grid;place-items:center}
@@ -116,6 +137,7 @@ const C = { skin:"#E9D3C7", skinS:"#D9BBAB", line:"#5B4048", hair:"#3A2A30", ros
 
 function hl(z){ // Markierung der Zielzone
   if(!z) return "";
+  if(Array.isArray(z[0])) return z.map(hl).join("");
   return `<ellipse cx="${z[0]}" cy="${z[1]}" rx="${z[2]}" ry="${z[3]}" fill="rgba(198,153,139,.18)" stroke="${C.rose}" stroke-width="2.5" stroke-dasharray="6 5"/>`;
 }
 
@@ -203,7 +225,58 @@ function closeup(o={}){
   </svg>`;
 }
 
-const VIEW = { frontal, threeQuarter, profile, closeup };
+const SVG0 = `<svg viewBox="0 0 200 250" fill="none" stroke="${C.line}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">`;
+
+function body(o={}){ // Körper-Silhouette, Sportkleidung. view: front | back | side (side: Blick nach rechts)
+  const v=o.view||"front", arms=o.arms||"down", A=`stroke="${C.skinS}" stroke-width="12"`;
+  if(v==="side") return `${SVG0}
+    <circle cx="100" cy="24" r="14" fill="${C.skin}"/>
+    <path d="M94 38 L106 38 L108 46 Q122 52 120 72 Q116 88 116 100 Q126 118 122 140 L116 190 L118 242 L102 242 L100 194 L94 150 Q82 128 86 108 Q90 90 86 72 Q84 54 94 46Z" fill="${C.skin}"/>
+    <path d="M86 58 L120 58 L120 76 L87 76Z" fill="${C.shirt}" stroke="none"/>
+    <path d="M86 112 L121 112 L120 142 L96 148 L88 134Z" fill="${C.shirt}" stroke="none"/>
+    <path d="M100 50 Q96 84 104 120" ${A}/>
+    ${hl(o.zone)}</svg>`;
+  const armP = { down:["M76 50 Q62 90 64 130","M124 50 Q138 90 136 130"], out:["M78 50 L22 56","M122 50 L178 56"], up:["M78 50 Q50 34 76 12","M122 50 Q150 34 124 12"] }[arms];
+  return `${SVG0}
+    <circle cx="100" cy="24" r="14" fill="${C.skin}"/>
+    <path d="M92 36 L108 36 L108 44 L92 44Z" fill="${C.skin}"/>
+    <path d="M78 44 Q100 40 122 44 L126 60 Q122 86 118 100 Q128 116 130 138 L126 152 L74 152 L70 138 Q72 116 82 100 Q78 86 74 60Z" fill="${C.skin}"/>
+    <path d="M74 150 L80 242 L96 242 L99 160Z M126 150 L120 242 L104 242 L101 160Z" fill="${C.skin}"/>
+    <path d="M75 56 L125 56 L123 74 L77 74Z" fill="${C.shirt}" stroke="none"/>
+    <path d="M71 112 L129 112 L131 142 L104 148 L100 156 L96 148 L69 142Z" fill="${C.shirt}" stroke="none"/>
+    ${v==="back"?`<path d="M100 48 L100 108" stroke-width="1.5" opacity=".7"/>`:`<path d="M96 92 Q100 96 104 92" stroke-width="1.5" opacity=".7"/>`}
+    ${armP.map(d=>`<path d="${d}" ${A}/>`).join("")}
+    ${hl(o.zone)}</svg>`;
+}
+
+function hands(o={}){ // zwei Hände, Handflächen (palm) oder Handrücken
+  const one = x => `<g transform="translate(${x} 0)">
+    <rect x="0" y="110" width="60" height="78" rx="20" fill="${C.skin}"/>
+    ${[4,18,32,46].map((f,k)=>`<rect x="${f}" y="${[62,52,56,70][k]}" width="12" height="${[56,66,62,48][k]}" rx="6" fill="${C.skin}"/>`).join("")}
+    <rect x="-18" y="118" width="12" height="44" rx="6" fill="${C.skin}" transform="rotate(-30 -12 140)"/>
+    ${o.back?`<path d="M14 130 L18 160 M30 128 L30 160 M46 130 L42 160" stroke-width="1.2" opacity=".5"/>`:`<path d="M6 150 Q30 136 56 148 M10 166 Q30 156 50 170" stroke-width="1.4" opacity=".7"/>`}
+    <rect x="12" y="186" width="36" height="40" fill="${C.skinS}"/></g>`;
+  return `${SVG0}${one(28)}<g transform="translate(200 0) scale(-1 1)">${one(28)}</g>${hl(o.zone)}</svg>`;
+}
+
+function feet(o={}){ // Fußsohlen
+  const one = `<path d="M60 70 Q38 72 40 120 Q42 176 52 204 Q62 228 76 214 Q86 186 84 124 Q88 74 60 70Z" fill="${C.skin}"/>
+    ${[[50,58,7],[62,56,6],[72,60,5],[80,66,4.5],[86,74,4]].map(t=>`<circle cx="${t[0]}" cy="${t[1]}" r="${t[2]}" fill="${C.skin}"/>`).join("")}`;
+  return `${SVG0}${one}<g transform="translate(200 0) scale(-1 1)">${one}</g>${hl(o.zone)}</svg>`;
+}
+
+function eyesClose(o={}){ // Augenpartie nah
+  return `${SVG0}
+    <rect x="10" y="40" width="180" height="170" rx="24" fill="${C.skin}" stroke="none"/>
+    <path d="M24 88 Q50 76 80 86"/><path d="M120 86 Q150 76 176 88"/>
+    <path d="M28 118 Q54 98 82 118 Q54 132 28 118Z" fill="#fff"/><circle cx="55" cy="117" r="8" fill="${C.line}" stroke="none"/>
+    <path d="M118 118 Q146 98 172 118 Q146 132 118 118Z" fill="#fff"/><circle cx="145" cy="117" r="8" fill="${C.line}" stroke="none"/>
+    <path d="M32 134 Q55 146 80 134" stroke-width="1.4" opacity=".6"/><path d="M120 134 Q145 146 168 134" stroke-width="1.4" opacity=".6"/>
+    <path d="M100 100 Q96 150 90 176 Q100 184 110 176" stroke-width="1.8"/>
+    ${hl(o.zone)}</svg>`;
+}
+
+const VIEW = { frontal, threeQuarter, profile, closeup, body, hands, feet, eyesClose };
 const mirror = svg => svg.replace('<svg ', '<svg style="transform:scaleX(-1)" ');
 
 /* Echte Beispielfotos: Datei beispiele/<pose>.jpg. Nur Posen in dieser Liste nutzen ein Foto,
@@ -250,69 +323,160 @@ const P = {
                tips:["Etwa 45°","Ganzes Gesicht im Bild"] },
   nah:       { title:"Nahaufnahme Problemzone", say:"Handy näher an die behandelte Stelle halten (ca. 30 cm), Stelle mittig.", draw:()=>closeup(),
                tips:["Nicht zoomen, sondern näher rangehen","Auf die Haut tippen, damit sie scharf wird","Kein Blitz, keine Schatten"] },
+  beissen:   { title:"Zähne zusammenbeißen", say:"Bitte die Zähne fest zusammenbeißen, Lippen locker lassen.", draw:()=>frontal({zone:[[58,150,14,22],[142,150,14,22]]}),
+               tips:["Kaumuskel an beiden Kieferwinkeln sichtbar","Frontal, Kopf gerade"] },
+  beissenL:  { title:"Zubeißen, seitlich links", say:"Kopf leicht nach rechts drehen (linke Gesichtshälfte zur Kamera) und fest zubeißen.", draw:()=>mirror(threeQuarter({zone:[70,146,18,24]})),
+               tips:["Etwa 45°","Kieferwinkel und Ohr im Bild"] },
+  beissenR:  { title:"Zubeißen, seitlich rechts", say:"Kopf leicht nach links drehen (rechte Gesichtshälfte zur Kamera) und fest zubeißen.", draw:()=>threeQuarter({zone:[70,146,18,24]}),
+               tips:["Etwa 45°","Kieferwinkel und Ohr im Bild"] },
+  unterlid:  { title:"Unterlider nah", say:"Bitte geradeaus schauen, Gesicht entspannt. Handy auf Augenhöhe, ca. 40 cm Abstand.", draw:()=>eyesClose({zone:[[55,142,30,12],[145,142,30,12]]}),
+               tips:["Beide Augen und Wangenansatz im Bild","Licht von vorne, sonst wirken die Augenringe dunkler"] },
+  dekollete: { title:"Hals und Dekolleté", say:"Bitte gerade hinstellen, Schultern locker, Kinn leicht anheben.", draw:()=>frontal({zone:[100,222,64,24]}),
+               tips:["Ausschnitt: Kinn bis Brustansatz","Kette und Schal ab","Nur wenn Hals oder Dekolleté behandelt wird, sonst überspringen"] },
+  handruecken:{ title:"Handrücken", say:"Bitte beide Hände flach nebeneinander halten, Handrücken zur Kamera.", draw:()=>hands({back:true}),
+               tips:["Finger leicht gespreizt, beide Hände ganz im Bild","Ringe ab","Nur wenn die Hände behandelt werden, sonst überspringen"] },
+  achseln:   { title:"Achseln", say:"Bitte beide Arme hinter den Kopf nehmen.", draw:()=>body({arms:"up",zone:[[74,58,12,12],[126,58,12,12]]}),
+               tips:["Beide Achseln im Bild","Deo vorher abwischen"] },
+  haende:    { title:"Handflächen", say:"Bitte beide Hände flach nebeneinander halten, Handflächen zur Kamera.", draw:()=>hands({zone:[[58,140,26,30],[142,140,26,30]]}),
+               tips:["Beide Hände ganz im Bild, Finger leicht gespreizt"] },
+  fuesse:    { title:"Fußsohlen", say:"Bitte hinsetzen oder hinlegen, Fußsohlen zur Kamera.", draw:()=>feet(),
+               tips:["Beide Sohlen ganz im Bild","Socken aus"] },
+  koerperVorne:{ title:"Von vorne", say:"Bitte gerade hinstellen, Arme locker neben dem Körper, Füße hüftbreit.", draw:()=>body(),
+               tips:["Gerade stehen, nicht den Bauch einziehen","Handy auf Höhe der behandelten Zone halten"] },
+  koerperHinten:{ title:"Von hinten", say:"Bitte umdrehen, Rücken zur Kamera, Arme locker.", draw:()=>body({view:"back"}),
+               tips:["Gleicher Abstand wie von vorne","Haare hochnehmen, falls sie den Rücken verdecken"] },
+  koerperL:  { title:"Linke Seite", say:"Bitte zur Seite drehen, die linke Körperseite zeigt zur Kamera. Arme leicht nach vorne.", draw:()=>mirror(body({view:"side"})),
+               tips:["Genau seitlich, 90°","Arme dürfen die Taille nicht verdecken"] },
+  koerperR:  { title:"Rechte Seite", say:"Bitte zur Seite drehen, die rechte Körperseite zeigt zur Kamera. Arme leicht nach vorne.", draw:()=>body({view:"side"}),
+               tips:["Genau seitlich, 90°","Arme dürfen die Taille nicht verdecken"] },
+  armeVorne: { title:"Oberarme von vorne", say:"Bitte beide Arme seitlich auf Schulterhöhe heben, Handflächen nach vorne.", draw:()=>body({arms:"out",zone:[[50,54,26,10],[150,54,26,10]]}),
+               tips:["Beide Arme komplett im Bild","Arme locker lassen, nicht anspannen"] },
+  armeHinten:{ title:"Oberarme von hinten", say:"Bitte umdrehen und die Arme wieder seitlich auf Schulterhöhe heben.", draw:()=>body({view:"back",arms:"out",zone:[[50,58,26,10],[150,58,26,10]]}),
+               tips:["Unterseite der Oberarme gut sichtbar","Gleicher Abstand wie von vorne"] },
 };
 
-const TREAT = [
-  { id:"botulinum", name:"Faltenbehandlung (Botulinum)", hint:"Stirn, Zornesfalte, Krähenfüße", icon:()=>frontal({brows:"frown"}),
-    poses:["ruhe","boese","brauenHoch","lachen","lachenL","lachenR"] },
-  { id:"nefertiti", name:"Nefertiti Lift", hint:"Hals und Kieferlinie", icon:()=>frontal({mouth:"platysma"}),
-    poses:["ruhe","halsAn","seiteLRuhe","seiteLAn","seiteRRuhe","seiteRAn"] },
-  { id:"lippen", name:"Lippen (Hyaluron)", hint:"Lippenvolumen und -kontur", icon:()=>frontal({mouth:"smile"}),
-    poses:["ruhe","laecheln","profilL","profilR","vonUnten"] },
-  { id:"nase", name:"Nase (Hyaluron)", hint:"Nasenprofil", icon:()=>profile(),
-    poses:["ruhe","profilL","profilR","vonUnten"] },
-  { id:"haut", name:"Skinbooster, Peel, Polynukleotide", hint:"Hautbild", icon:()=>closeup(),
-    poses:["ruhe","nase45L","nase45R","nah"] },
-];
+/* ---------- Behandlungen (wie im Buchungsfunnel: Kategorie > Behandlung) ---------- */
+const FACE = ["ruhe","nase45L","profilL","nase45R","profilR"];
+const UNTERLID = ["ruhe","unterlid","nase45L","nase45R"];
+const BERATUNG = { id:"beratung", name:"Beratung & Behandlung", hint:"Gesicht einmal rundherum plus Mimik",
+  note:"Für alle, bei denen noch nicht feststeht, was gemacht wird. In der Beratung kommen oft weitere Themen auf, dann hat die Ärztin die Bilder schon.",
+  poses:[...FACE,"boese","brauenHoch","lachen"] };
 
-const PREP = [
-  "Heller, ruhiger Hintergrund (weiße Wand), Fenster nicht im Rücken",
-  "Gleiches Licht wie immer, kein Blitz",
-  "Haare zurück (Haarband), Stirn und Ohren frei",
-  "Make-up, Brille und Schmuck ab",
-  "Handy im Hochformat, auf Augenhöhe, ca. 1 m Abstand, nicht zoomen",
+const GROUPS = [
+  { id:"botox", name:"Botulinum", icon:()=>frontal({brows:"frown"}), items:[
+    { id:"botox-zonen", name:"Botox 1, 2–3 oder ab 4 Zonen", hint:"Stirn, Zornesfalte, Krähenfüße", poses:["ruhe","boese","brauenHoch","lachen","lachenL","lachenR"] },
+    { id:"nefertiti", name:"Nefertiti Lift", hint:"Hals und Kieferlinie", poses:["ruhe","halsAn","seiteLRuhe","seiteLAn","seiteRRuhe","seiteRAn"] },
+    { id:"glassskin", name:"Skinbotox „Glassskin“", hint:"Hautbild", poses:["ruhe","nase45L","nase45R","nah"] },
+    { id:"masseter", name:"Masseter „Zähneknirschen“", hint:"Kaumuskel", poses:["ruhe","beissen","beissenL","beissenR"] },
+    { id:"hyperhidrose", name:"Hyperhidrose", hint:"Achseln, Hände, Füße", body:true,
+      note:"Nur die Zonen fotografieren, die behandelt werden. Die anderen überspringen.", poses:["achseln","haende","fuesse"] },
+  ]},
+  { id:"hyaluron", name:"Hyaluron", icon:()=>frontal({mouth:"smile"}), items:[
+    { id:"lippen", name:"Lippenunterspritzung", hint:"Volumen und Kontur", poses:["ruhe","laecheln","profilL","profilR","vonUnten"] },
+    { id:"nase", name:"Nasenkorrektur", hint:"Nasenprofil", poses:["ruhe","profilL","profilR","vonUnten"] },
+    { id:"wangen", name:"Wangenaufbau", hint:"Mittelgesicht", poses:FACE },
+    { id:"kinn", name:"Kinnaufbau", hint:"Kinnprofil", poses:["ruhe","profilL","profilR"] },
+    { id:"jawline", name:"Jawlineaufbau", hint:"Kieferlinie", poses:[...FACE,"vonUnten"] },
+    { id:"marionetten", name:"Marionettenfalten", hint:"Mundwinkel", poses:["ruhe","laecheln","nase45L","nase45R"] },
+    { id:"hylase", name:"Hyaluron auflösen „Hylase“", hint:"Behandelte Stelle", poses:["ruhe","nase45L","nase45R","nah"] },
+  ]},
+  { id:"biostim", name:"Biostimulation", icon:()=>threeQuarter(), items:[
+    { id:"contourlift", name:"Contour Lift", hint:"Gesicht rundherum", poses:FACE },
+    { id:"contourliftplus", name:"Contour Lift Plus", hint:"Gesicht rundherum", poses:FACE },
+    { id:"julaine", name:"Biostimulation mit Julaine", hint:"Gesicht rundherum", poses:FACE },
+    { id:"sculptra", name:"Sculptra", hint:"Gesicht rundherum", poses:FACE },
+    { id:"juvelook", name:"Juvelook Unterlider", hint:"Augenpartie", poses:UNTERLID },
+  ]},
+  { id:"skinbooster", name:"Skinbooster & Polynukleotide", icon:()=>closeup(), items:[
+    { id:"pn", name:"Polynukleotide Gesicht, Hals, Dekolleté, Hände", hint:"Nur behandelte Zonen",
+      note:"Hals, Dekolleté und Hände nur fotografieren, wenn sie behandelt werden. Sonst überspringen.", poses:["ruhe","nase45L","nase45R","dekollete","handruecken"] },
+    { id:"pn-unterlid", name:"Polynukleotide Unterlider", hint:"Augenpartie", poses:UNTERLID },
+    { id:"nctf", name:"NCTF Unterlider", hint:"Augenpartie", poses:UNTERLID },
+    { id:"profhilo", name:"Profhilo", hint:"Gesicht rundherum, Hautbild", poses:[...FACE,"nah"] },
+    { id:"structura", name:"Profhilo Structura", hint:"Gesicht rundherum, Hautbild", poses:[...FACE,"nah"] },
+  ]},
+  { id:"fettweg", name:"Fett-Weg-Spritze", icon:()=>body(), items:[
+    { id:"fw-gesicht", name:"Gesicht", hint:"Doppelkinn und Wangenfett", poses:["ruhe","profilL","profilR","vonUnten"] },
+    { id:"fw-bauch", name:"Bauch", hint:"Unterbrust bis Oberschenkel", body:true, crop:"Unterbrust bis Mitte Oberschenkel", poses:["koerperVorne","koerperL","koerperR"] },
+    { id:"fw-huefte", name:"Hüfte und Flanken", hint:"Unterbrust bis Oberschenkel", body:true, crop:"Unterbrust bis Mitte Oberschenkel", poses:["koerperVorne","koerperHinten","koerperL","koerperR"] },
+    { id:"fw-reiterhosen", name:"Reiterhosen", hint:"Taille bis Knie", body:true, crop:"Taille bis Knie", poses:["koerperVorne","koerperHinten","koerperL","koerperR"] },
+    { id:"fw-innenschenkel", name:"Innenschenkel", hint:"Taille bis Knie", body:true, crop:"Taille bis Knie, Füße hüftbreit", poses:["koerperVorne","koerperHinten"] },
+    { id:"fw-oberarme", name:"Oberarme", hint:"Beide Arme", body:true, crop:"Schultern und beide Arme bis zu den Händen", poses:["armeVorne","armeHinten"] },
+    { id:"fw-ruecken", name:"Rücken und BH-Bereich", hint:"Schultern bis Hüfte", body:true, crop:"Schultern bis Hüfte", poses:["koerperHinten","koerperL","koerperR"] },
+  ]},
+  { id:"peeling", name:"Hautpflege", icon:()=>frontal(), items:[
+    { id:"peeling", name:"Chemisches Peeling", hint:"Hautbild", poses:["ruhe","nase45L","nase45R","nah"] },
+  ]},
 ];
+const ITEMS = [BERATUNG, ...GROUPS.flatMap(g=>g.items)];
+
+const PREP_FACE = ["Weiße Wand, Fenster nicht im Rücken, kein Blitz","Haare zurück (Haarband), Stirn und Ohren frei","Make-up, Brille und Schmuck ab","Hochformat, Augenhöhe, ca. 1 m, nicht zoomen"];
+const PREP_BODY = ["Weiße Wand, Fenster nicht im Rücken, kein Blitz","Kleidung an der Zone ab, Unterwäsche oder Sport-BH bleibt an","Schmuck ab, Haare hochnehmen","Hochformat, Handy auf Höhe der Zone, ca. 1,5 m, nicht zoomen"];
 
 /* ---------- Zustand (nur im Arbeitsspeicher) ---------- */
-const S = { screen:"home", t:null, i:0, shots:{}, pending:null };
+const S = { screen:"home", g:null, t:null, i:0, shots:{}, pending:null };
 const app = document.getElementById("app");
 const cam = document.getElementById("cam");
 const back = document.getElementById("back");
 const sub = document.getElementById("sub");
-const treat = () => TREAT.find(t=>t.id===S.t);
+const treat = () => ITEMS.find(t=>t.id===S.t);
+const group = () => GROUPS.find(g=>g.id===S.g);
 const shotCount = () => Object.keys(S.shots).length;
+const fotos = n => n===1 ? "1 Foto" : `${n} Fotos`;
 
 function go(screen, extra={}){ Object.assign(S,{screen},extra); render(); window.scrollTo(0,0); }
 
 function render(){
   back.hidden = S.screen==="home";
-  sub.textContent = S.screen==="home" ? "Foto-Assistent" : treat().name;
-  ({home, prep, step, review, summary})[S.screen]();
+  sub.textContent = S.screen==="home" ? "Foto-Assistent" : S.screen==="cat" ? group().name : treat().name;
+  ({home, cat, prep, step, review, summary})[S.screen]();
 }
+
+function start(id){ go("prep",{t:id,i:0,shots:{},saved:false}); }
 
 function home(){
   app.innerHTML = `
     <h1>Wofür ist die Person da?</h1>
-    <p class="lead">Behandlung antippen, dann Foto für Foto folgen.</p>
-    <div class="grid">${TREAT.map(t=>`
-      <button class="tile" data-t="${t.id}">
-        <div class="ico">${t.icon()}</div>
-        <div><b>${t.name}</b><span>${t.hint} · ${t.poses.length} Fotos</span></div>
+    <button class="tile main" data-t="${BERATUNG.id}">
+      <div class="ico">${threeQuarter()}</div>
+      <div><b>${BERATUNG.name}</b><span>${BERATUNG.hint} · ${fotos(BERATUNG.poses.length)}</span></div>
+    </button>
+    <p class="lead">Oder gezielt nach Behandlung:</p>
+    <div class="grid two">${GROUPS.map(g=>`
+      <button class="tile" data-g="${g.id}">
+        <div class="ico">${g.icon()}</div>
+        <div><b>${g.name}</b><span>${g.items.length===1?fotos(g.items[0].poses.length):g.items.length+" Behandlungen"}</span></div>
       </button>`).join("")}
     </div>
     <div class="note"><b>Datenschutz:</b> Nichts wird gespeichert oder hochgeladen. Keine Namen eingeben.</div>
     <p class="foot">Beispielbilder sind KI-generiert (keine echte Patientin).</p>`;
-  app.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>go("prep",{t:b.dataset.t,i:0,shots:{}}));
+  app.querySelector("[data-t]").onclick=()=>start(BERATUNG.id);
+  app.querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>{
+    const g=GROUPS.find(x=>x.id===b.dataset.g);
+    if(g.items.length===1){ S.g=g.id; start(g.items[0].id); } else go("cat",{g:g.id});
+  });
+}
+
+function cat(){
+  const g=group();
+  app.innerHTML = `
+    <h2>Was ist gebucht?</h2>
+    <div class="grid list">${g.items.map(t=>`
+      <button class="tile" data-t="${t.id}"><div><b>${t.name}</b><span>${t.hint} · ${fotos(t.poses.length)}</span></div><i class="chev">›</i></button>`).join("")}
+    </div>`;
+  app.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>start(b.dataset.t));
 }
 
 function prep(){
+  const t=treat(), list=t.body?PREP_BODY:PREP_FACE;
   app.innerHTML = `
     <h2>Kurz vorbereiten</h2>
-    <p class="lead">Alles abhaken, dann geht es los. Einwilligung zur Fotodokumentation muss unterschrieben sein.</p>
-    <ul class="checklist">${PREP.map((p,k)=>`<li><label><input type="checkbox" data-k="${k}"><span>${p}</span></label></li>`).join("")}</ul>
-    <div class="stack"><button class="btn primary" id="go" disabled style="opacity:.45">Los geht's</button></div>`;
-  const boxes=[...app.querySelectorAll("input")], goBtn=app.querySelector("#go");
-  boxes.forEach(b=>b.onchange=()=>{const ok=boxes.every(x=>x.checked); goBtn.disabled=!ok; goBtn.style.opacity=ok?1:.45;});
+    ${t.note?`<div class="note">${t.note}</div>`:""}
+    <ul class="preplist">${list.map(p=>`<li>${p}</li>`).join("")}</ul>
+    <label class="checkall"><input type="checkbox" id="ok"><span><b>Alles erledigt</b><br>Einwilligung zur Fotodokumentation ist unterschrieben.</span></label>
+    <div class="stack"><button class="btn primary" id="go" disabled style="opacity:.45">Los geht's · ${fotos(t.poses.length)}</button></div>`;
+  const box=app.querySelector("#ok"), goBtn=app.querySelector("#go");
+  box.onchange=()=>{goBtn.disabled=!box.checked; goBtn.style.opacity=box.checked?1:.45;};
   goBtn.onclick=()=>go("step",{i:0});
 }
 
@@ -328,7 +492,7 @@ function step(){
     <div><div class="stepno">Foto ${S.i+1} von ${t.poses.length}</div><h2>${p.title}</h2></div>
     <div class="figure grow"><span class="tag">Beispiel</span>${example(key)}</div>
     <p class="instr">„${p.say}“</p>
-    <ul class="tips">${p.tips.map(x=>`<li>${x}</li>`).join("")}</ul>
+    <ul class="tips">${(t.crop?["<b>Ausschnitt: "+t.crop+"</b>"]:[]).concat(p.tips).map(x=>`<li>${x}</li>`).join("")}</ul>
     <div class="stack">
       <button class="btn primary" id="shoot">📷 Foto aufnehmen</button>
       <div class="row">
@@ -399,7 +563,7 @@ function summary(){
       <button class="btn primary" id="share" ${n?"":"disabled style='opacity:.45'"}>In Fotos-App sichern</button>
       <button class="btn ghost small" id="done">Fertig, Fotos aus der App löschen</button>
     </div>
-    <div class="note">Im Teilen-Menü <b>„${n||"X"} Bilder sichern“</b> wählen, dann in Clinicminds hochladen und vom Handy löschen.</div>`;
+    <div class="note">Im Teilen-Menü <b>„${n===1?"Bild":n+" Bilder"} sichern“</b> wählen, dann in Clinicminds hochladen und vom Handy löschen.</div>`;
   app.querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>go("step",{i:+b.dataset.i}));
   app.querySelector("#share").onclick=share;
   app.querySelector("#done").onclick=()=>{
@@ -422,9 +586,10 @@ async function share(){
   S.saved=true;
 }
 
+function clearShots(){ Object.values(S.shots).forEach(s=>URL.revokeObjectURL(s.url)); S.shots={}; S.pending=null; S.saved=false; S.i=0; }
 function reset(){
-  Object.values(S.shots).forEach(s=>URL.revokeObjectURL(s.url));
-  go("home",{t:null,i:0,shots:{},pending:null,saved:false});
+  clearShots();
+  go("home",{g:null,t:null});
 }
 
 function ask(msg, yesLabel, onYes){
@@ -440,7 +605,11 @@ function toast(msg){
 }
 
 back.onclick=()=>{
-  if(S.screen==="prep") return shotCount() ? ask("Abbrechen? Aufgenommene Fotos gehen verloren.","Ja, abbrechen",reset) : reset();
+  if(S.screen==="cat") return go("home");
+  if(S.screen==="prep"){
+    const leave=()=>{ const g=GROUPS.find(x=>x.items.some(i=>i.id===S.t)); if(g && g.items.length>1){ clearShots(); go("cat",{g:g.id,t:null}); } else reset(); };
+    return shotCount() ? ask("Abbrechen? Aufgenommene Fotos gehen verloren.","Ja, abbrechen",leave) : leave();
+  }
   if(S.screen==="step") return S.i>0 ? go("step",{i:S.i-1}) : go("prep");
   if(S.screen==="review") return go("step");
   if(S.screen==="summary") return go("step",{i:treat().poses.length-1});
@@ -449,6 +618,10 @@ back.onclick=()=>{
 window.addEventListener("beforeunload",e=>{ if(shotCount() && !S.saved){ e.preventDefault(); e.returnValue=""; } });
 
 if("serviceWorker" in navigator && location.protocol==="https:") navigator.serviceWorker.register("sw.js").catch(()=>{});
+
+/* Kein Zoomen, kein Scrollen: alles passt auf einen Bildschirm */
+["gesturestart","gesturechange","gestureend"].forEach(ev=>document.addEventListener(ev,e=>e.preventDefault(),{passive:false}));
+document.addEventListener("touchmove",e=>e.preventDefault(),{passive:false});
 
 render();
 </script>
