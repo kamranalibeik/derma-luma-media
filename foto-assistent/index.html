@@ -282,7 +282,7 @@ const mirror = svg => svg.replace('<svg ', '<svg style="transform:scaleX(-1)" ')
 /* Echte Beispielfotos: Datei beispiele/<pose>.jpg. Nur Posen in dieser Liste nutzen ein Foto,
    alle anderen zeigen weiter die Illustration. Nur Bilder mit Einwilligung bzw. KI-generierte Bilder, nie Patientenfotos. */
 const FOTOS = new Set(["ruhe","boese","brauenHoch","lachen","lachenL","lachenR","halsAn","seiteLRuhe","seiteLAn","seiteRRuhe","seiteRAn","laecheln","profilL","profilR","vonUnten","nase45L","nase45R","nah",
-  "beissen","beissenL","beissenR","unterlid","dekollete","handruecken","achseln","haende","fuesse","koerperVorne","koerperHinten","koerperL","koerperR","armeVorne","armeHinten"]);
+  "beissen","beissenL","beissenR","unterlid","dekollete","handruecken","achseln","haende","fuesse","koerperVorne","koerperHinten","koerperL","koerperR","armeVorne","armeHinten","pinch","doppelkinn"]);
 const example = key => FOTOS.has(key) ? `<img src="beispiele/${key}.jpg" alt="Beispiel: ${P[key].title}">` : P[key].draw();
 
 /* ---------- Posen ---------- */
@@ -336,6 +336,10 @@ const P = {
                tips:["Ausschnitt: Kinn bis Brustansatz","Kette und Schal ab","Nur wenn Hals oder Dekolleté behandelt wird, sonst überspringen"] },
   handruecken:{ title:"Handrücken", say:"Bitte beide Hände flach nebeneinander halten, Handrücken zur Kamera.", draw:()=>hands({back:true}),
                tips:["Finger leicht gespreizt, beide Hände ganz im Bild","Ringe ab","Nur wenn die Hände behandelt werden, sonst überspringen"] },
+  pinch:     { title:"Pinch-Test Wange", say:"Bitte die Haut der Wange zwischen Daumen und Zeigefinger nehmen und leicht abheben. Gesicht entspannt.", draw:()=>frontal({zone:[56,140,18,20]}),
+               tips:["Frontal, Kopf gerade","Hand seitlich, sie darf Mund und Augen nicht verdecken","Wie weit und wie dünn die Haut sich abheben lässt, muss sichtbar sein"] },
+  doppelkinn:{ title:"Doppelkinn, Kinn gesenkt", say:"Bitte gerade nach vorne schauen und das Kinn leicht Richtung Brust senken, Gesicht locker.", draw:()=>frontal({zone:[100,178,40,18]}),
+               tips:["Ausschnitt: Nase bis Schlüsselbeine","Handy etwas über Kinnhöhe halten","Nicht die Zähne zusammenbeißen"] },
   achseln:   { title:"Achseln", say:"Bitte beide Arme hinter den Kopf nehmen.", draw:()=>body({arms:"up",zone:[[74,58,12,12],[126,58,12,12]]}),
                tips:["Beide Achseln im Bild","Deo vorher abwischen"] },
   haende:    { title:"Handflächen", say:"Bitte beide Hände flach nebeneinander halten, Handflächen zur Kamera.", draw:()=>hands({zone:[[58,140,26,30],[142,140,26,30]]}),
@@ -382,10 +386,10 @@ const GROUPS = [
     { id:"hylase", name:"Hyaluron auflösen „Hylase“", hint:"Behandelte Stelle", poses:["ruhe","nase45L","nase45R","nah"] },
   ]},
   { id:"biostim", name:"Biostimulation", icon:()=>threeQuarter(), items:[
-    { id:"contourlift", name:"Contour Lift", hint:"Gesicht rundherum", poses:FACE },
-    { id:"contourliftplus", name:"Contour Lift Plus", hint:"Gesicht rundherum", poses:FACE },
-    { id:"julaine", name:"Biostimulation mit Julaine", hint:"Gesicht rundherum", poses:FACE },
-    { id:"sculptra", name:"Sculptra", hint:"Gesicht rundherum", poses:FACE },
+    { id:"contourlift", name:"Contour Lift", hint:"Gesicht rundherum", poses:[...FACE,"pinch"] },
+    { id:"contourliftplus", name:"Contour Lift Plus", hint:"Gesicht rundherum", poses:[...FACE,"pinch"] },
+    { id:"julaine", name:"Biostimulation mit Julaine", hint:"Gesicht rundherum", poses:[...FACE,"pinch"] },
+    { id:"sculptra", name:"Sculptra", hint:"Gesicht rundherum", poses:[...FACE,"pinch"] },
     { id:"juvelook", name:"Juvelook Unterlider", hint:"Augenpartie", poses:UNTERLID },
   ]},
   { id:"skinbooster", name:"Skinbooster & Polynukleotide", icon:()=>closeup(), items:[
@@ -397,7 +401,7 @@ const GROUPS = [
     { id:"structura", name:"Profhilo Structura", hint:"Gesicht rundherum, Hautbild", poses:[...FACE,"nah"] },
   ]},
   { id:"fettweg", name:"Fett-Weg-Spritze", icon:()=>body(), items:[
-    { id:"fw-gesicht", name:"Gesicht", hint:"Doppelkinn und Wangenfett", poses:["ruhe","profilL","profilR","vonUnten"] },
+    { id:"fw-gesicht", name:"Gesicht", hint:"Doppelkinn und Wangenfett", poses:["ruhe","doppelkinn","profilL","profilR","vonUnten"] },
     { id:"fw-bauch", name:"Bauch", hint:"Unterbrust bis Oberschenkel", body:true, crop:"Unterbrust bis Mitte Oberschenkel", poses:["koerperVorne","koerperL","koerperR"] },
     { id:"fw-huefte", name:"Hüfte und Flanken", hint:"Unterbrust bis Oberschenkel", body:true, crop:"Unterbrust bis Mitte Oberschenkel", poses:["koerperVorne","koerperHinten","koerperL","koerperR"] },
     { id:"fw-reiterhosen", name:"Reiterhosen", hint:"Taille bis Knie", body:true, crop:"Taille bis Knie", poses:["koerperVorne","koerperHinten","koerperL","koerperR"] },
