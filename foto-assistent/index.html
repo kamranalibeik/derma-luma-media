@@ -95,12 +95,14 @@ main .grow{flex:1 1 0;min-height:120px}
 .tips{margin:0;padding-left:18px;color:var(--muted);font-size:13px;line-height:1.35}
 .tips li{margin:1px 0}
 .thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.thumbs.four{grid-template-columns:repeat(4,1fr)}
 .thumb{position:relative;aspect-ratio:1/1;border-radius:12px;overflow:hidden;background:var(--surface);border:1px solid var(--line);cursor:pointer;padding:0}
 .thumb img{width:100%;height:100%;object-fit:cover;display:block}
 .thumb .lbl{position:absolute;left:0;right:0;bottom:0;padding:16px 6px 5px;font-size:11px;background:linear-gradient(transparent,rgba(0,0,0,.85));text-align:left}
 .thumb.missing{display:grid;place-items:center;color:var(--warn);font-size:12px;text-align:center;padding:6px}
 .note{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--rose);border-radius:12px;padding:8px 12px;font-size:13px;line-height:1.35;color:var(--muted)}
 .note b{color:var(--text)}
+.note.steps{margin:0;padding-left:30px;display:grid;gap:2px}
 .head{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
 .pair{display:flex;gap:8px}
 .pair>.figure{flex:1}
@@ -560,7 +562,7 @@ function summary(){
   app.innerHTML = `
     <h2>Fertig${n?"":" – noch keine Fotos"}</h2>
     <p class="lead">${n} von ${t.poses.length} Fotos. Antippen, um eins neu zu machen.${missing.length?` <span style="color:var(--warn)">${missing.length} fehlen noch.</span>`:""}</p>
-    <div class="thumbs">${t.poses.map((k,i)=>S.shots[i]
+    <div class="thumbs${t.poses.length>6?" four":""}">${t.poses.map((k,i)=>S.shots[i]
       ? `<button class="thumb" data-i="${i}"><img src="${S.shots[i].url}" alt=""><span class="lbl">${i+1}. ${P[k].title}</span></button>`
       : `<button class="thumb missing" data-i="${i}">fehlt:<br>${P[k].title}</button>`).join("")}
     </div>
@@ -568,7 +570,7 @@ function summary(){
       <button class="btn primary" id="share" ${n?"":"disabled style='opacity:.45'"}>In Fotos-App sichern</button>
       <button class="btn ghost small" id="done">Fertig, Fotos aus der App löschen</button>
     </div>
-    <div class="note">Im Teilen-Menü <b>„${n===1?"Bild":n+" Bilder"} sichern“</b> wählen, dann in Clinicminds hochladen und vom Handy löschen.</div>`;
+    <ol class="note steps"><li>Im Teilen-Menü <b>„${n===1?"Bild":n+" Bilder"} sichern“</b></li><li><b>Clinicminds-App</b> öffnen → Patient → Fotos hinzufügen → aus der Mediathek wählen</li><li>Danach die Fotos in der Fotos-App löschen</li></ol>`;
   app.querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>go("step",{i:+b.dataset.i}));
   app.querySelector("#share").onclick=share;
   app.querySelector("#done").onclick=()=>{
